@@ -1,8 +1,16 @@
-package com.udacity.asteroidradar
+package com.udacity.asteroidradar.utils
 
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.databinding.BindingAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
+import com.udacity.asteroidradar.R
+import com.udacity.asteroidradar.models.Asteroid
+import com.udacity.asteroidradar.models.PictureOfDay
+import com.udacity.asteroidradar.ui.main.AsteroidAdapter
 
 @BindingAdapter("statusIcon")
 fun bindAsteroidStatusImage(imageView: ImageView, isHazardous: Boolean) {
@@ -38,4 +46,31 @@ fun bindTextViewToKmUnit(textView: TextView, number: Double) {
 fun bindTextViewToDisplayVelocity(textView: TextView, number: Double) {
     val context = textView.context
     textView.text = String.format(context.getString(R.string.km_s_unit_format), number)
+}
+
+@BindingAdapter("listData")
+fun bindRecyclerView(recyclerView: RecyclerView, data: List<Asteroid>?) {
+    (recyclerView.adapter as AsteroidAdapter).submitList(data)
+}
+
+@BindingAdapter("checkVisibility")
+fun checkVisibility(view: View, it: Any?) {
+    view.visibility = if (it != null) View.GONE else View.VISIBLE
+}
+
+@BindingAdapter("image")
+fun bindImage(imgView: ImageView, image: PictureOfDay?) {
+    if (image?.mediaType == "image") {
+        image.url.let { imgUrl ->
+            val imgUri = imgUrl.toUri().buildUpon().scheme("https").build()
+            Picasso.with(imgView.context)
+                .load(imgUri)
+                .placeholder(R.drawable.placeholder_picture_of_day)
+                .into(imgView)
+            imgView.contentDescription = String.format(
+                imgView.context.getString(R.string.nasa_picture_of_day_content_description_format),
+                image.title
+            )
+        }
+    }
 }
